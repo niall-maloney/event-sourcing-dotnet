@@ -1,3 +1,4 @@
+using EventStore.Client;
 using FluentAssertions;
 using NodaTime;
 
@@ -11,7 +12,7 @@ public class EventTests
     {
         //Arrange
         var testId = NewGuidString();
-        var evntId = NewGuidString();
+        var evntId = Uuid.NewUuid();
         var occuredAt = Instant.FromUtc(2023, 07, 01, 12, 00, 00);
         ulong streamPosition = 1;
         ulong categoryStreamPosition = 1;
@@ -30,7 +31,7 @@ public class EventTests
         envelope.Metadata.EventId.Should().Be(evntId);
         envelope.Metadata.OccurredAt.Should().Be(occuredAt);
         envelope.Metadata.StreamPosition.Should().Be(streamPosition);
-        envelope.Metadata.CategoryStreamPosition.Should().Be(categoryStreamPosition);
+        envelope.Metadata.AggregatedStreamPosition.Should().Be(categoryStreamPosition);
     }
 
     private static string NewGuidString() => Guid.NewGuid().ToString();

@@ -4,7 +4,7 @@ using NodaTime.Serialization.SystemTextJson;
 
 namespace NiallMaloney.EventSourcing;
 
-public class DefaultJsonSerialization
+public static class DefaultJsonSerializerOptions
 {
     public static readonly JsonSerializerOptions Options = new JsonSerializerOptions
         {
