@@ -4,22 +4,18 @@ namespace NiallMaloney.EventSourcing.Aggregates;
 
 public abstract class Aggregate
 {
-    public string Id
-    {
-        get => _id ?? throw new InvalidOperationException("No ID set");
-        init => _id = value;
-    }
+    private readonly string? _id;
+    public string Id { get => _id ?? throw new InvalidOperationException("No ID set"); init => _id = value; }
 
     public int Version { get; protected set; }
 
-    private readonly IDictionary<Type, Action<IEvent>> _handlers = new Dictionary<Type, Action<IEvent>>();
-
-    private readonly string? _id;
-    private readonly Queue<IEvent> _unsavedEvents = new();
     private ImmutableArray<EventEnvelope<IEvent>> _savedEvents = ImmutableArray<EventEnvelope<IEvent>>.Empty;
+    public ImmutableArray<EventEnvelope<IEvent>> SavedEvents => _savedEvents;
 
+    private readonly Queue<IEvent> _unsavedEvents = new();
     public ImmutableArray<IEvent> UnsavedEvents => _unsavedEvents.ToImmutableArray();
-    public ulong? LastSavedEventVersion() => _savedEvents.LastOrDefault()?.Metadata.StreamPosition;
+
+    private readonly IDictionary<Type, Action<IEvent>> _handlers = new Dictionary<Type, Action<IEvent>>();
 
     public ImmutableArray<IEvent> DequeueUnsavedEvents()
     {
@@ -30,12 +26,10 @@ public abstract class Aggregate
 
     protected void When<T>(Action<T> handler) where T : class, IEvent
     {
-        _handlers.Add(
-            typeof(T),
-            e => handler(
-                e as T ??
-                throw new InvalidOperationException(
-                    $"Cannot apply event, as event cannot be cast to \"{typeof(T).Name}\".")));
+        _handlers.Add(typeof(T),
+            e => handler(e as T ??
+                         throw new InvalidOperationException(
+                             $"Cannot apply event, as event cannot be cast to \"{typeof(T).Name}\".")));
     }
 
     protected void RaiseEvent(IEvent evnt)

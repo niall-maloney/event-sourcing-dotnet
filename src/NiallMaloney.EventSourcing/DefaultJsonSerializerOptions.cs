@@ -6,9 +6,7 @@ namespace NiallMaloney.EventSourcing;
 
 public static class DefaultJsonSerializerOptions
 {
-    public static readonly JsonSerializerOptions Options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        }
-        .ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+    public static readonly JsonSerializerOptions Options =
+        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+            .ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
 }

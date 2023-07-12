@@ -24,7 +24,7 @@ public class AggregateTests
         {
             new CountIncreased(10, 10),
             new CountIncreased(20, 10),
-            new CountDecreased(10, 10),
+            new CountDecreased(10, 10)
         }, options => options.RespectingRuntimeTypes());
     }
 
