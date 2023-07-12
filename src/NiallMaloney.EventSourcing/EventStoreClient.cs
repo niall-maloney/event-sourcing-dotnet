@@ -48,8 +48,7 @@ public class EventStoreClient
         IReadOnlyCollection<IEvent> events,
         CancellationToken cancellationToken = default)
     {
-        await _eventStore.AppendToStreamAsync(streamName,
-            expectedRevision,
+        await _eventStore.AppendToStreamAsync(streamName, expectedRevision,
             events.Select(
                 e => new EventData(Uuid.NewUuid(), IEvent.GetEventType(e.GetType()), _serializer.Serialize(e))),
             cancellationToken: cancellationToken);

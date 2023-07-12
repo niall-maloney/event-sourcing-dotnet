@@ -1,4 +1,5 @@
 using System.Reflection;
+using EventStore.Client;
 
 namespace NiallMaloney.EventSourcing.Aggregates;
 
@@ -17,4 +18,7 @@ public static class AggregateUtilities
 
         return categoryAttribute.Category;
     }
+
+    public static ulong GetLastSavedRevision(this Aggregate aggregate) =>
+        aggregate.SavedEvents.LastOrDefault()?.Metadata.StreamPosition ?? StreamRevision.None;
 }

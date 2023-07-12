@@ -51,7 +51,11 @@ public class AggregateRepositoryTests
         //Arrange
         var counterId = NewGuidString();
 
-        var events = new IEvent[] { new CountIncreased(20, 20), new CountDecreased(10, 10) };
+        var events = new IEvent[]
+        {
+            new CountIncreased(20, 20),
+            new CountDecreased(10, 10)
+        };
         await _client.AppendToStreamAsync($"counter-{counterId}", StreamRevision.None, events);
 
         //Act

@@ -1,5 +1,3 @@
-using EventStore.Client;
-
 namespace NiallMaloney.EventSourcing.Aggregates;
 
 public class AggregateRepository
@@ -37,9 +35,8 @@ public class AggregateRepository
             return;
         }
 
-        await _eventStore.AppendToStreamAsync(
-            streamName: streamName,
-            expectedRevision: aggregate.LastSavedEventVersion() ?? StreamRevision.None,
-            events: unsavedEvents);
+        var expectedRevision = aggregate.GetLastSavedRevision();
+
+        await _eventStore.AppendToStreamAsync(streamName, expectedRevision, unsavedEvents);
     }
 }

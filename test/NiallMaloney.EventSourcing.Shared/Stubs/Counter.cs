@@ -6,7 +6,7 @@ namespace NiallMaloney.EventSourcing.Shared.Stubs;
 [Category("counter")]
 public class Counter : Aggregate
 {
-    public int CurrentCount { get; private set; } = 0;
+    public int CurrentCount { get; private set; }
 
     public Counter()
     {

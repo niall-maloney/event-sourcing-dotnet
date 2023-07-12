@@ -33,10 +33,8 @@ public class EventSerializer
             throw new InvalidOperationException($"Could not find Event class for {eventRecord.EventType}.");
         }
 
-        var deserializedEvent = JsonSerializer.Deserialize(
-            eventRecord.Data.Span,
-            eventType,
-            DefaultJsonSerializerOptions.Options);
+        var deserializedEvent =
+            JsonSerializer.Deserialize(eventRecord.Data.Span, eventType, DefaultJsonSerializerOptions.Options);
 
         if (deserializedEvent is null)
         {
@@ -48,8 +46,8 @@ public class EventSerializer
 
     private static ImmutableDictionary<string, Type> GetEventTypeLookup(IEnumerable<Assembly> assemblies)
     {
-        var eventSubclasses = assemblies.SelectMany(
-            assembly => assembly.DefinedTypes.Where(type => type.ImplementedInterfaces.Contains(typeof(IEvent))));
+        var eventSubclasses = assemblies.SelectMany(assembly =>
+            assembly.DefinedTypes.Where(type => type.ImplementedInterfaces.Contains(typeof(IEvent))));
 
         return eventSubclasses.ToImmutableDictionary(IEvent.GetEventType, type => type.AsType());
     }
