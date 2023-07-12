@@ -12,7 +12,6 @@ public class EventStoreTests
     private readonly EventStoreClientOptions _eventStoreOptions =
         new("esdb+discover://localhost:2113?tls=false&keepAliveTimeout=10000&keepAliveInterval=10000");
 
-
     public EventStoreTests()
     {
         var eventStore =

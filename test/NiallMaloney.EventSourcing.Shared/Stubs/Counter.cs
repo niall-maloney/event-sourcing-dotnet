@@ -1,13 +1,12 @@
 using NiallMaloney.EventSourcing.Aggregates;
-using NiallMaloney.EventSourcing.UnitTests.Stubs.Events;
+using NiallMaloney.EventSourcing.Shared.Stubs.Events;
 
-namespace NiallMaloney.EventSourcing.UnitTests.Stubs;
+namespace NiallMaloney.EventSourcing.Shared.Stubs;
 
+[Category("counter")]
 public class Counter : Aggregate
 {
-    private int _currentCount = 0;
-
-    public int CurrentCount => _currentCount;
+    public int CurrentCount { get; private set; } = 0;
 
     public Counter()
     {
@@ -22,7 +21,7 @@ public class Counter : Aggregate
             throw new InvalidOperationException();
         }
 
-        var newCount = _currentCount + amount;
+        var newCount = CurrentCount + amount;
         RaiseEvent(new CountIncreased(newCount, amount));
     }
 
@@ -33,17 +32,17 @@ public class Counter : Aggregate
             throw new InvalidOperationException();
         }
 
-        var newCount = _currentCount - amount;
+        var newCount = CurrentCount - amount;
         RaiseEvent(new CountDecreased(newCount, amount));
     }
 
     private void Apply(CountIncreased evnt)
     {
-        _currentCount = evnt.Count;
+        CurrentCount = evnt.Count;
     }
 
     private void Apply(CountDecreased evnt)
     {
-        _currentCount = evnt.Count;
+        CurrentCount = evnt.Count;
     }
 }
