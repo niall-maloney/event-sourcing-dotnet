@@ -24,6 +24,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\NiallMaloney.EventSourcing\NiallMaloney.EventSourcing.csproj" />
+      <ProjectReference Include="..\NiallMaloney.EventSourcing.Shared\NiallMaloney.EventSourcing.Shared.csproj" />
     </ItemGroup>
 
 </Project>

@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiallMaloney.EventSourcing.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiallMaloney.EventSourcing.IntegrationTests", "test\NiallMaloney.EventSourcing.IntegrationTests\NiallMaloney.EventSourcing.IntegrationTests.csproj", "{EAB8F7FA-10D9-406E-9BC8-6D2CC3D65919}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiallMaloney.EventSourcing.Shared", "test\NiallMaloney.EventSourcing.Shared\NiallMaloney.EventSourcing.Shared.csproj", "{8D97FE2C-EB27-4198-ABBC-F532AF059DD9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,10 +44,15 @@ Global
 		{EAB8F7FA-10D9-406E-9BC8-6D2CC3D65919}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EAB8F7FA-10D9-406E-9BC8-6D2CC3D65919}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EAB8F7FA-10D9-406E-9BC8-6D2CC3D65919}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D97FE2C-EB27-4198-ABBC-F532AF059DD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D97FE2C-EB27-4198-ABBC-F532AF059DD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D97FE2C-EB27-4198-ABBC-F532AF059DD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D97FE2C-EB27-4198-ABBC-F532AF059DD9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C459D1B9-C387-47FC-8132-89C5BC6B3A6B} = {4782CE73-A0D6-4934-AEEB-64E714C06F84}
 		{BB782D19-640B-49D9-9758-707EFF920F19} = {E89C70FF-4672-42C7-B5A2-A26AC77601AE}
 		{EAB8F7FA-10D9-406E-9BC8-6D2CC3D65919} = {E89C70FF-4672-42C7-B5A2-A26AC77601AE}
+		{8D97FE2C-EB27-4198-ABBC-F532AF059DD9} = {E89C70FF-4672-42C7-B5A2-A26AC77601AE}
 	EndGlobalSection
 EndGlobal

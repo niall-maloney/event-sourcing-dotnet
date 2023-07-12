@@ -4,18 +4,24 @@ namespace NiallMaloney.EventSourcing.Aggregates;
 
 public abstract class Aggregate
 {
-    public string Id { get; protected set; } = default!;
+    public string Id
+    {
+        get => _id ?? throw new InvalidOperationException("No ID set");
+        init => _id = value;
+    }
 
     public int Version { get; protected set; }
 
     private readonly IDictionary<Type, Action<IEvent>> _handlers = new Dictionary<Type, Action<IEvent>>();
 
+    private readonly string? _id;
     private readonly Queue<IEvent> _unsavedEvents = new();
     private ImmutableArray<EventEnvelope<IEvent>> _savedEvents = ImmutableArray<EventEnvelope<IEvent>>.Empty;
 
     public ImmutableArray<IEvent> UnsavedEvents => _unsavedEvents.ToImmutableArray();
+    public ulong? LastSavedEventVersion() => _savedEvents.LastOrDefault()?.Metadata.StreamPosition;
 
-    protected ImmutableArray<IEvent> DequeueUnsavedEvents()
+    public ImmutableArray<IEvent> DequeueUnsavedEvents()
     {
         var unsavedEvents = UnsavedEvents;
         _unsavedEvents.Clear();
@@ -38,7 +44,7 @@ public abstract class Aggregate
         _unsavedEvents.Enqueue(evnt);
     }
 
-    protected void ReplayEvent(EventEnvelope<IEvent> eventEnvelope)
+    public void ReplayEvent(EventEnvelope<IEvent> eventEnvelope)
     {
         ApplyEvent(eventEnvelope.Event);
         _savedEvents = _savedEvents.Add(eventEnvelope);

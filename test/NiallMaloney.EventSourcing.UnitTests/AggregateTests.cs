@@ -1,6 +1,6 @@
 using FluentAssertions;
-using NiallMaloney.EventSourcing.UnitTests.Stubs;
-using NiallMaloney.EventSourcing.UnitTests.Stubs.Events;
+using NiallMaloney.EventSourcing.Shared.Stubs;
+using NiallMaloney.EventSourcing.Shared.Stubs.Events;
 
 namespace NiallMaloney.EventSourcing.UnitTests;
 
