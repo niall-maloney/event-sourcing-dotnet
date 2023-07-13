@@ -59,7 +59,7 @@ public class AggregateTests
     }
 
     [Fact]
-    public void GivenAnAggregate_WhenInvalidCommands_ThenExceptionThrows()
+    public void GivenAnAggregate_WhenInvalidCommand_ThenExceptionThrows()
     {
         //Arrange
         var counter = new Counter();
