@@ -6,13 +6,12 @@ using NiallMaloney.EventSourcing.Subscriptions;
 
 namespace NiallMaloney.EventSourcing.IntegrationTests;
 
-public class SubscriptionManagerTests
+public class SubscriptionsTests
 {
     private readonly EventStoreClient _client;
-
     private readonly InMemoryCursorRepository _cursorRepository;
 
-    public SubscriptionManagerTests()
+    public SubscriptionsTests()
     {
         var eventStore =
             new EventStore.Client.EventStoreClient(
@@ -29,7 +28,8 @@ public class SubscriptionManagerTests
         var store = new TestStore();
         var subscriber = new TestProjection(store);
         var cancellationToken = new CancellationToken();
-        var subscriptionManager = new SubscriptionManager(_client, _cursorRepository, subscriber);
+        var subscriptionsManager =
+            new SubscriptionsManager(_client, new HashSet<ISubscriber> { subscriber }, _cursorRepository);
 
         var subscriberName = "TestProjection";
         var categoryStreamName = "$ce-tests";
@@ -42,12 +42,13 @@ public class SubscriptionManagerTests
 
         //Set cursor to current stream to avoid full projection
         await _cursorRepository.UpsertSubscriptionCursor(subscriberName, categoryStreamName, categoryStreamLength);
-        await subscriptionManager.StartAsync(cancellationToken);
+        await subscriptionsManager.StartAsync(cancellationToken);
 
         //Act
         await _client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents, cancellationToken);
         await WaitForSubscriptionToCatchup(subscriberName, categoryStreamName, expectedCategoryStreamLength);
 
+        await subscriptionsManager.StopAsync(cancellationToken);
         //Assert
         store.Tests.ContainsKey(streamId).Should().BeTrue();
         store.Tests[streamId].Should().Be(3);
