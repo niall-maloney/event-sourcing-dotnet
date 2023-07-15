@@ -53,10 +53,10 @@ public class AggregateRepositoryTests
 
         var events = new IEvent[]
         {
-            new CountIncreased(20, 20),
-            new CountDecreased(10, 10)
+            new CountIncreased(counterId, 20, 20),
+            new CountDecreased(counterId, 10, 10)
         };
-        await _client.AppendToStreamAsync($"counter-{counterId}", StreamRevision.None, events);
+        await _client.AppendToStreamAsync($"counters-{counterId}", StreamRevision.None, events);
 
         //Act
         var counter = await _repository.LoadAggregate<Counter>(counterId);

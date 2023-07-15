@@ -10,7 +10,7 @@ public class AggregateTests
     public void GivenAnAggregate_WhenValidCommands_ThenUnsavedEvents()
     {
         //Arrange
-        var counter = new Counter();
+        var counter = new Counter { Id = "cntr-1" };
 
         //Act
         counter.Increase(10);
@@ -22,9 +22,9 @@ public class AggregateTests
         counter.Version.Should().Be(3);
         counter.UnsavedEvents.Should().BeEquivalentTo(new IEvent[]
         {
-            new CountIncreased(10, 10),
-            new CountIncreased(20, 10),
-            new CountDecreased(10, 10)
+            new CountIncreased(counter.Id, 10, 10),
+            new CountIncreased(counter.Id, 20, 10),
+            new CountDecreased(counter.Id, 10, 10)
         }, options => options.RespectingRuntimeTypes());
     }
 
@@ -32,7 +32,7 @@ public class AggregateTests
     public void GivenAnAggregate_WhenValidCommands_ThenStateUpdatesImmediately()
     {
         //Arrange
-        var counter = new Counter();
+        var counter = new Counter { Id = "cntr-1" };
 
         //Act
         counter.Increase(10);
