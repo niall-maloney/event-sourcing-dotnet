@@ -22,7 +22,7 @@ public class AggregateRepositoryTests
         var eventStore =
             new EventStore.Client.EventStoreClient(
                 EventStoreClientSettings.Create(_eventStoreOptions.ConnectionString));
-        var serializer = new EventSerializer(Assembly.GetAssembly(typeof(CountDecreased)));
+        var serializer = new EventSerializer(Assembly.GetAssembly(typeof(CountDecreased))!);
         _client = new EventStoreClient(eventStore, serializer);
         _repository = new AggregateRepository(_client);
     }

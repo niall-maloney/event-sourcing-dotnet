@@ -17,7 +17,7 @@ public class EventStoreTests
         var eventStore =
             new EventStore.Client.EventStoreClient(
                 EventStoreClientSettings.Create(_eventStoreOptions.ConnectionString));
-        var serializer = new EventSerializer(Assembly.GetAssembly(typeof(UnitTested)));
+        var serializer = new EventSerializer(Assembly.GetAssembly(typeof(UnitTested))!);
         _client = new EventStoreClient(eventStore, serializer);
     }
 
@@ -36,7 +36,7 @@ public class EventStoreTests
             await _client.ReadStreamAsync(streamId, StreamPosition.Start, Direction.Forwards, resolveLinkTos: true);
 
         //Assert
-        var events = await enumerable.ToListAsync();
+        var events = await enumerable!.ToListAsync();
         events.Count.Should().Be(1);
 
         var envelope = events.Single();
@@ -64,7 +64,7 @@ public class EventStoreTests
         var enumerable = await _client.ReadStreamFromBeginningAsync(streamId, resolveLinkTos: true);
 
         //Assert
-        var events = await enumerable.ToListAsync();
+        var events = await enumerable!.ToListAsync();
         events.Count.Should().Be(3);
 
         var position = 0UL;
