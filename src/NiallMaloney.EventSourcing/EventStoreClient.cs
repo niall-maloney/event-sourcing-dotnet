@@ -20,18 +20,20 @@ public class EventStoreClient
         bool resolveLinkTos,
         CancellationToken cancellationToken = default)
     {
-        return ReadStreamAsync(streamName, StreamPosition.Start, Direction.Forwards, resolveLinkTos, cancellationToken);
+        return ReadStreamAsync(streamName, StreamPosition.Start, Direction.Forwards, resolveLinkTos: resolveLinkTos,
+            cancellationToken: cancellationToken);
     }
 
     public async Task<IAsyncEnumerable<EventEnvelope<IEvent>>?> ReadStreamAsync(
         string streamName,
         StreamPosition position,
         Direction direction,
-        bool resolveLinkTos,
+        long maxCount = long.MaxValue,
+        bool resolveLinkTos = false,
         CancellationToken cancellationToken = default)
     {
-        var result = _eventStore.ReadStreamAsync(direction, streamName, position, resolveLinkTos: resolveLinkTos,
-            cancellationToken: cancellationToken);
+        var result = _eventStore.ReadStreamAsync(direction, streamName, position, maxCount: maxCount,
+            resolveLinkTos: resolveLinkTos, cancellationToken: cancellationToken);
 
         if (await result.ReadState is ReadState.StreamNotFound)
         {

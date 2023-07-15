@@ -1,4 +1,4 @@
 namespace NiallMaloney.EventSourcing.Shared.Stubs.Events;
 
 [Event("CountIncreased")]
-public record CountIncreased(int Count, int IncreasedBy) : IEvent;
+public record CountIncreased(string CounterId, int Count, int IncreasedBy) : IEvent;
