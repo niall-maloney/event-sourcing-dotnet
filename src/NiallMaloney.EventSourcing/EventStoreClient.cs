@@ -53,4 +53,23 @@ public class EventStoreClient
                 e => new EventData(Uuid.NewUuid(), IEvent.GetEventType(e.GetType()), _serializer.Serialize(e))),
             cancellationToken: cancellationToken);
     }
+
+    public async Task<StreamSubscription> SubscribeToStreamAsync(
+        string streamName,
+        FromStream start,
+        Func<EventEnvelope<IEvent>, CancellationToken, Task> eventAppeared,
+        bool resolveLinkTos = false,
+        CancellationToken cancellationToken = default)
+    {
+        return await _eventStore.SubscribeToStreamAsync(streamName, start,
+            (ss, re, ct) =>
+            {
+                var evnt = new EventEnvelope<IEvent>(
+                    _serializer.Deserialize(re.Event),
+                    EventMetadata.FromResolvedEvent(re));
+
+                return eventAppeared.Invoke(evnt, ct);
+            }, resolveLinkTos,
+            cancellationToken: cancellationToken);
+    }
 }

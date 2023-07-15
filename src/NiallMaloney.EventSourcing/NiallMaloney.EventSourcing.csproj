@@ -7,9 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="EventStore.Client.Grpc.Streams" Version="23.0.0"/>
-        <PackageReference Include="NodaTime" Version="3.1.9"/>
-        <PackageReference Include="NodaTime.Serialization.SystemTextJson" Version="1.0.0"/>
+        <PackageReference Include="EventStore.Client.Grpc.Streams" Version="23.0.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
+        <PackageReference Include="NodaTime" Version="3.1.9" />
+        <PackageReference Include="NodaTime.Serialization.SystemTextJson" Version="1.0.0" />
     </ItemGroup>
 
 </Project>
