@@ -9,14 +9,11 @@ public class EventStoreTests
 {
     private readonly EventStoreClient _client;
 
-    private readonly EventStoreClientOptions _eventStoreOptions =
-        new("esdb+discover://localhost:2113?tls=false&keepAliveTimeout=10000&keepAliveInterval=10000");
-
     public EventStoreTests()
     {
         var eventStore =
             new EventStore.Client.EventStoreClient(
-                EventStoreClientSettings.Create(_eventStoreOptions.ConnectionString));
+                EventStoreClientSettings.Create(Options.EventStore.ConnectionString));
         var serializer = new EventSerializer(Assembly.GetAssembly(typeof(UnitTested))!);
         _client = new EventStoreClient(eventStore, serializer);
     }
