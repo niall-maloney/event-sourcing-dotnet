@@ -5,14 +5,14 @@ namespace NiallMaloney.EventSourcing.Subscriptions;
 public class SubscriptionsManager : IHostedService
 {
     private readonly EventStoreClient _eventStore;
-    private readonly ISet<ISubscriber> _subscribers;
+    private readonly IEnumerable<ISubscriber> _subscribers;
     private readonly ISubscriptionCursorRepository _cursorRepository;
 
     private readonly ISet<SubscriptionManager> _subscriptionManagers = new HashSet<SubscriptionManager>();
 
     public SubscriptionsManager(
         EventStoreClient eventStore,
-        ISet<ISubscriber> subscribers,
+        IEnumerable<ISubscriber> subscribers,
         ISubscriptionCursorRepository cursorRepository)
     {
         _eventStore = eventStore;
