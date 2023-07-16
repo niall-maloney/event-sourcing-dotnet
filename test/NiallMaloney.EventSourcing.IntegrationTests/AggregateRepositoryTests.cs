@@ -2,9 +2,11 @@ using System.Reflection;
 using EventStore.Client;
 using FluentAssertions;
 using FluentAssertions.Execution;
+using Microsoft.Extensions.DependencyInjection;
 using NiallMaloney.EventSourcing.Aggregates;
 using NiallMaloney.EventSourcing.Shared.Stubs;
 using NiallMaloney.EventSourcing.Shared.Stubs.Events;
+using NiallMaloney.EventSourcing.Subscriptions;
 
 namespace NiallMaloney.EventSourcing.IntegrationTests;
 
@@ -16,12 +18,12 @@ public class AggregateRepositoryTests
 
     public AggregateRepositoryTests()
     {
-        var eventStore =
-            new EventStore.Client.EventStoreClient(
-                EventStoreClientSettings.Create(Options.EventStore.ConnectionString));
-        var serializer = new EventSerializer(Assembly.GetAssembly(typeof(CountDecreased))!);
-        _client = new EventStoreClient(eventStore, serializer);
-        _repository = new AggregateRepository(_client);
+        var services = new ServiceCollection();
+        services.AddEventStore(Options.EventStore, new[] { Assembly.GetAssembly(typeof(CountDecreased)) }!);
+
+        var provider = services.BuildServiceProvider();
+        _client = provider.GetRequiredService<EventStoreClient>();
+        _repository = provider.GetRequiredService<AggregateRepository>();
     }
 
     [Fact]
