@@ -11,6 +11,20 @@ jobs:
       matrix:
         dotnet-version: [ '6.0.x' ]
     timeout-minutes: 10
+    
+    services:
+      eventstore:
+        image: eventstore/eventstore:22.10.2-buster-slim
+        env:
+          EVENTSTORE_CLUSTER_SIZE: 1
+          EVENTSTORE_RUN_PROJECTIONS: All
+          EVENTSTORE_START_STANDARD_PROJECTIONS: true
+          EVENTSTORE_INSECURE: true
+          EVENTSTORE_ENABLE_EXTERNAL_TCP: true
+          EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP: true
+        ports:
+          - 1113:1113
+          - 2113:2113
 
     steps:
       - uses: actions/checkout@v3
