@@ -27,6 +27,8 @@ public class SubscriptionsTests
         var store = provider.GetRequiredService<TestStore>();
         var client = provider.GetRequiredService<EventStoreClient>();
 
+        await PrepareStream(client, cancellationToken);
+
         var subscriberName = "TestSubscriber";
         var categoryStreamName = "$ce-tests";
         var categoryStreamLength = await GetCategoryStreamLength(client, categoryStreamName);
@@ -49,6 +51,14 @@ public class SubscriptionsTests
         //Assert
         store.Tests.ContainsKey(streamId).Should().BeTrue();
         store.Tests[streamId].Should().Be(3);
+    }
+
+    private static async Task PrepareStream(EventStoreClient client, CancellationToken cancellationToken)
+    {
+        // fire off random an event so category stream exists
+        var streamId = $"tests-{Guid.NewGuid().ToString()}";
+        await client.AppendToStreamAsync(streamId, StreamRevision.None, new[] { new UnitTested(streamId) },
+            cancellationToken);
     }
 
     private static async Task WaitForSubscriptionToCatchup(
@@ -74,7 +84,13 @@ public class SubscriptionsTests
     {
         var enumerable = await client.ReadStreamAsync(streamName, StreamPosition.End, Direction.Backwards, 1,
             resolveLinkTos: true);
-        var envelope = await enumerable!.SingleAsync();
+
+        if (enumerable is null)
+        {
+            return 0;
+        }
+
+        var envelope = await enumerable.SingleAsync();
         return envelope.Metadata.AggregatedStreamPosition;
     }
 }
