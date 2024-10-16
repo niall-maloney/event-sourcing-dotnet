@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using NiallMaloney.EventSourcing.Aggregates;
 using NiallMaloney.EventSourcing.Shared.Stubs;
 using NiallMaloney.EventSourcing.Shared.Stubs.Events;
-using NiallMaloney.EventSourcing.Subscriptions;
 
 namespace NiallMaloney.EventSourcing.IntegrationTests;
 

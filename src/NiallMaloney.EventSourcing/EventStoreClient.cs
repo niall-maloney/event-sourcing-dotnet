@@ -64,7 +64,7 @@ public class EventStoreClient
         CancellationToken cancellationToken = default)
     {
         return await _eventStore.SubscribeToStreamAsync(streamName, start,
-            (ss, re, ct) =>
+            (_, re, ct) =>
             {
                 var evnt = new EventEnvelope<IEvent>(
                     _serializer.Deserialize(re.Event),
