@@ -1,11 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4782CE73-A0D6-4934-AEEB-64E714C06F84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiallMaloney.EventSourcing", "src\NiallMaloney.EventSourcing\NiallMaloney.EventSourcing.csproj", "{C459D1B9-C387-47FC-8132-89C5BC6B3A6B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiallMaloney.EventSourcing", "src\NiallMaloney.EventSourcing\NiallMaloney.EventSourcing.csproj", "{C459D1B9-C387-47FC-8132-89C5BC6B3A6B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{D254004C-84A3-4B3E-84CD-50FD3EAB50DF}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,11 +19,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "misc", "misc", "{D254004C-8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E89C70FF-4672-42C7-B5A2-A26AC77601AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiallMaloney.EventSourcing.UnitTests", "test\NiallMaloney.EventSourcing.UnitTests\NiallMaloney.EventSourcing.UnitTests.csproj", "{BB782D19-640B-49D9-9758-707EFF920F19}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiallMaloney.EventSourcing.UnitTests", "test\NiallMaloney.EventSourcing.UnitTests\NiallMaloney.EventSourcing.UnitTests.csproj", "{BB782D19-640B-49D9-9758-707EFF920F19}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiallMaloney.EventSourcing.IntegrationTests", "test\NiallMaloney.EventSourcing.IntegrationTests\NiallMaloney.EventSourcing.IntegrationTests.csproj", "{EAB8F7FA-10D9-406E-9BC8-6D2CC3D65919}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiallMaloney.EventSourcing.IntegrationTests", "test\NiallMaloney.EventSourcing.IntegrationTests\NiallMaloney.EventSourcing.IntegrationTests.csproj", "{EAB8F7FA-10D9-406E-9BC8-6D2CC3D65919}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiallMaloney.EventSourcing.Shared", "test\NiallMaloney.EventSourcing.Shared\NiallMaloney.EventSourcing.Shared.csproj", "{8D97FE2C-EB27-4198-ABBC-F532AF059DD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiallMaloney.EventSourcing.Shared", "test\NiallMaloney.EventSourcing.Shared\NiallMaloney.EventSourcing.Shared.csproj", "{8D97FE2C-EB27-4198-ABBC-F532AF059DD9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
