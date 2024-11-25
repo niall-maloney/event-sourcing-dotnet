@@ -21,14 +21,14 @@ public class SubscriptionManager
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var streamNames = ISubscriber.GetSubscriptionAttributes(_subscriber.GetType())
-            .Select(subscriptionAttribute => subscriptionAttribute.StreamName)
+        var attributes = ISubscriber.GetSubscriptionAttributes(_subscriber.GetType())
             .Distinct();
 
-        foreach (var streamName in streamNames)
+        foreach (var attribute in attributes)
         {
+            var streamName = attribute.StreamName;
             var currentCursor = await GetCursor(streamName);
-            var start = currentCursor.HasValue ? FromStream.After(currentCursor.Value) : FromStream.Start;
+            var start = currentCursor.HasValue ? FromStream.After(currentCursor.Value) : GetFromStream(attribute.Begin);
             var subscription = await _eventStore.SubscribeToStreamAsync(
                 streamName, start, async (evnt, _) =>
                 {
@@ -49,13 +49,19 @@ public class SubscriptionManager
         return Task.CompletedTask;
     }
 
-    private async Task<ulong?> GetCursor(string streamName)
-    {
-        var subscriberName = ISubscriber.GetSubscriberName(_subscriber.GetType());
-        return await _cursorRepository.GetSubscriptionCursor(subscriberName, streamName);
-    }
+    private async Task<ulong?> GetCursor(string streamName) =>
+        await _cursorRepository.GetSubscriptionCursor(GetSubscriberName(), streamName);
 
     private async Task UpdateCursor(string streamName, EventEnvelope<IEvent> evnt) =>
-        await _cursorRepository.UpsertSubscriptionCursor(ISubscriber.GetSubscriberName(_subscriber.GetType()),
-            streamName, evnt.Metadata.AggregatedStreamPosition);
+        await _cursorRepository.UpsertSubscriptionCursor(GetSubscriberName(), streamName,
+            evnt.Metadata.AggregatedStreamPosition);
+
+    private static FromStream GetFromStream(CursorFromStream begin) => begin switch
+    {
+        CursorFromStream.Start => FromStream.Start,
+        CursorFromStream.End   => FromStream.End,
+        _                      => throw new ArgumentOutOfRangeException(nameof(begin), begin, null),
+    };
+
+    private string GetSubscriberName() => ISubscriber.GetSubscriberName(_subscriber.GetType());
 }

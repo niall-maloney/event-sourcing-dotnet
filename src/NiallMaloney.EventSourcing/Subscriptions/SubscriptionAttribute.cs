@@ -5,5 +5,11 @@ public class SubscriptionAttribute : Attribute
 {
     public string StreamName { get; }
 
-    public SubscriptionAttribute(string streamName) => StreamName = streamName;
+    public CursorFromStream Begin { get; }
+
+    public SubscriptionAttribute(string streamName, CursorFromStream begin = CursorFromStream.Start)
+    {
+        StreamName = streamName;
+        Begin = begin;
+    }
 }
