@@ -16,8 +16,8 @@ public class SubscriptionsTests
         //Arrange
         var cancellationToken = new CancellationToken();
         var services = new ServiceCollection();
-        services.AddEventStore(Options.EventStore, new[] { Assembly.GetAssembly(typeof(UnitTested)) }!)
-            .AddSubscriber<TestSubscriber>()
+        services.AddEventStore(Options.EventStore, [Assembly.GetAssembly(typeof(UnitTested))!]!)
+            .AddSubscriber<TestSubscriberFromStreamStart>()
             .AddSingleton<ISubscriptionCursorRepository, InMemoryCursorRepository>()
             .AddSingleton<TestStore>();
         var provider = services.BuildServiceProvider();
@@ -29,17 +29,61 @@ public class SubscriptionsTests
 
         await PrepareStream(client, cancellationToken);
 
-        var subscriberName = "TestSubscriber";
-        var categoryStreamName = "$ce-tests";
-        var categoryStreamLength = await GetCategoryStreamLength(client, categoryStreamName);
-        var expectedCategoryStreamLength = categoryStreamLength + 3;
+        var subscriberName = TestSubscriberFromStreamStart.SubscriberName;
+        var categoryStreamName = TestSubscriberFromStreamStart.CategoryStreamName;
 
         var testId = Guid.NewGuid().ToString();
         var streamId = $"tests-{testId}";
-        var unitTestedEvents = new[] { new UnitTested(streamId), new UnitTested(streamId), new UnitTested(streamId) };
+        IEvent[] unitTestedEvents = [new UnitTested(streamId), new UnitTested(streamId), new UnitTested(streamId)];
+
+        var categoryStreamLength = await GetCategoryStreamLength(client, categoryStreamName);
+        var expectedCategoryStreamLength = categoryStreamLength + (ulong)unitTestedEvents.Length;
 
         //Set cursor to current stream length to avoid full projection
         await cursorRepository.UpsertSubscriptionCursor(subscriberName, categoryStreamName, categoryStreamLength);
+        await subscriptionsManager.StartAsync(cancellationToken);
+
+        //Act
+        await client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents, cancellationToken);
+        await WaitForSubscriptionToCatchup(cursorRepository, subscriberName, categoryStreamName,
+            expectedCategoryStreamLength);
+        await subscriptionsManager.StopAsync(cancellationToken);
+
+        //Assert
+        store.Tests.ContainsKey(streamId).Should().BeTrue();
+        store.Tests[streamId].Should().Be(3);
+    }
+
+    [Fact]
+    public async Task GivenSubscriptionRegistered_WithCursorFromStreamEnd_WhenEventsCommitted_ThenEventHandlerCalled()
+    {
+        //Arrange
+        var cancellationToken = new CancellationToken();
+        var services = new ServiceCollection();
+        services.AddEventStore(Options.EventStore, [Assembly.GetAssembly(typeof(UnitTested))!]!)
+            .AddSubscriber<TestSubscriberFromStreamEnd>()
+            .AddSingleton<ISubscriptionCursorRepository, InMemoryCursorRepository>()
+            .AddSingleton<TestStore>();
+        var provider = services.BuildServiceProvider();
+
+        var subscriptionsManager = provider.GetRequiredService<IHostedService>();
+        var cursorRepository = provider.GetRequiredService<ISubscriptionCursorRepository>();
+        var store = provider.GetRequiredService<TestStore>();
+        var client = provider.GetRequiredService<EventStoreClient>();
+
+        await PrepareStream(client, cancellationToken);
+
+        var subscriberName = TestSubscriberFromStreamEnd.SubscriberName;
+        var categoryStreamName = TestSubscriberFromStreamEnd.CategoryStreamName;
+
+        var testId = Guid.NewGuid().ToString();
+        var streamId = $"tests-{testId}";
+        IEvent[] unitTestedEvents = [new UnitTested(streamId), new UnitTested(streamId), new UnitTested(streamId)];
+
+        var categoryStreamLength = await GetCategoryStreamLength(client, categoryStreamName);
+        var expectedCategoryStreamLength = categoryStreamLength + (ulong)unitTestedEvents.Length;
+
+        //We don't need to set cursor to current stream length as we are subscribing from end
         await subscriptionsManager.StartAsync(cancellationToken);
 
         //Act
@@ -112,13 +156,38 @@ public class TestStore
     }
 }
 
-[SubscriberName("TestSubscriber")]
-[Subscription("$ce-tests")]
-public class TestSubscriber : SubscriberBase
+[SubscriberName(SubscriberName)]
+[Subscription(CategoryStreamName)]
+public class TestSubscriberFromStreamStart : SubscriberBase
 {
+    public const string SubscriberName = "TestSubscriberFromStreamStart";
+    public const string CategoryStreamName = "$ce-tests";
+
     private readonly TestStore _store;
 
-    public TestSubscriber(TestStore store)
+    public TestSubscriberFromStreamStart(TestStore store)
+    {
+        _store = store;
+        When<UnitTested>(Handle);
+    }
+
+    private Task Handle(UnitTested evnt, EventMetadata metadata)
+    {
+        _store.Add(evnt.TestId);
+        return Task.CompletedTask;
+    }
+}
+
+[SubscriberName(SubscriberName)]
+[Subscription(CategoryStreamName, begin: CursorFromStream.End)]
+public class TestSubscriberFromStreamEnd : SubscriberBase
+{
+    public const string SubscriberName = "TestSubscriberFromStreamEnd";
+    public const string CategoryStreamName = "$ce-tests";
+
+    private readonly TestStore _store;
+
+    public TestSubscriberFromStreamEnd(TestStore store)
     {
         _store = store;
         When<UnitTested>(Handle);
