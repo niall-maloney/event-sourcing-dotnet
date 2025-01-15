@@ -1,6 +1,6 @@
 using EventStore.Client;
-using FluentAssertions;
 using NodaTime;
+using Shouldly;
 
 namespace NiallMaloney.EventSourcing.UnitTests;
 
@@ -23,15 +23,15 @@ public class EventTests
         EventEnvelope<UnitTested> envelope = new(evnt, metadata);
 
         //Assert
-        envelope.Event.Should().Be(evnt);
-        envelope.Metadata.Should().Be(metadata);
+        envelope.Event.ShouldBe(evnt);
+        envelope.Metadata.ShouldBe(metadata);
 
-        envelope.Event.TestId.Should().Be(testId);
+        envelope.Event.TestId.ShouldBe(testId);
 
-        envelope.Metadata.EventId.Should().Be(evntId);
-        envelope.Metadata.OccurredAt.Should().Be(occuredAt);
-        envelope.Metadata.StreamPosition.Should().Be(streamPosition);
-        envelope.Metadata.AggregatedStreamPosition.Should().Be(categoryStreamPosition);
+        envelope.Metadata.EventId.ShouldBe(evntId);
+        envelope.Metadata.OccurredAt.ShouldBe(occuredAt);
+        envelope.Metadata.StreamPosition.ShouldBe(streamPosition);
+        envelope.Metadata.AggregatedStreamPosition.ShouldBe(categoryStreamPosition);
     }
 
     private static string NewGuidString() => Guid.NewGuid().ToString();
