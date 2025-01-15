@@ -1,10 +1,10 @@
 using System.Reflection;
 using EventStore.Client;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NiallMaloney.EventSourcing.Shared.Stubs;
 using NiallMaloney.EventSourcing.Subscriptions;
+using Shouldly;
 
 namespace NiallMaloney.EventSourcing.IntegrationTests;
 
@@ -50,8 +50,8 @@ public class SubscriptionsTests
         await subscriptionsManager.StopAsync(cancellationToken);
 
         //Assert
-        store.Tests.ContainsKey(streamId).Should().BeTrue();
-        store.Tests[streamId].Should().Be(3);
+        store.Tests.ContainsKey(streamId).ShouldBeTrue();
+        store.Tests[streamId].ShouldBe(3);
     }
 
     [Fact]
@@ -93,15 +93,15 @@ public class SubscriptionsTests
         await subscriptionsManager.StopAsync(cancellationToken);
 
         //Assert
-        store.Tests.ContainsKey(streamId).Should().BeTrue();
-        store.Tests[streamId].Should().Be(3);
+        store.Tests.ContainsKey(streamId).ShouldBeTrue();
+        store.Tests[streamId].ShouldBe(3);
     }
 
     private static async Task PrepareStream(EventStoreClient client, CancellationToken cancellationToken)
     {
         // fire off random an event so category stream exists
         var streamId = $"tests-{Guid.NewGuid().ToString()}";
-        await client.AppendToStreamAsync(streamId, StreamRevision.None, new[] { new UnitTested(streamId) },
+        await client.AppendToStreamAsync(streamId, StreamRevision.None, [new UnitTested(streamId)],
             cancellationToken);
     }
 

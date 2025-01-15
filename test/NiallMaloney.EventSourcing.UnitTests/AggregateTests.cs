@@ -1,6 +1,6 @@
-using FluentAssertions;
 using NiallMaloney.EventSourcing.Shared.Stubs;
 using NiallMaloney.EventSourcing.Shared.Stubs.Events;
+using Shouldly;
 
 namespace NiallMaloney.EventSourcing.UnitTests;
 
@@ -18,14 +18,14 @@ public class AggregateTests
         counter.Decrease(10);
 
         //Assert
-        counter.CurrentCount.Should().Be(10);
-        counter.Version.Should().Be(3);
-        counter.UnsavedEvents.Should().BeEquivalentTo(new IEvent[]
+        counter.CurrentCount.ShouldBe(10);
+        counter.Version.ShouldBe(3);
+        counter.UnsavedEvents.ShouldBe(new IEvent[]
         {
             new CountIncreased(counter.Id, 10, 10),
             new CountIncreased(counter.Id, 20, 10),
             new CountDecreased(counter.Id, 10, 10)
-        }, options => options.RespectingRuntimeTypes());
+        });
     }
 
     [Fact]
@@ -48,14 +48,14 @@ public class AggregateTests
         var versionAfterThird = counter.Version;
 
         //Assert
-        countAfterFirst.Should().Be(10);
-        versionAfterFirst.Should().Be(1);
+        countAfterFirst.ShouldBe(10);
+        versionAfterFirst.ShouldBe(1);
 
-        countAfterSecond.Should().Be(20);
-        versionAfterSecond.Should().Be(2);
+        countAfterSecond.ShouldBe(20);
+        versionAfterSecond.ShouldBe(2);
 
-        countAfterThird.Should().Be(10);
-        versionAfterThird.Should().Be(3);
+        countAfterThird.ShouldBe(10);
+        versionAfterThird.ShouldBe(3);
     }
 
     [Fact]
@@ -68,6 +68,6 @@ public class AggregateTests
         var action = () => counter.Increase(-10);
 
         //Assert
-        action.Should().Throw<InvalidOperationException>();
+        Should.Throw<InvalidOperationException>(action);
     }
 }

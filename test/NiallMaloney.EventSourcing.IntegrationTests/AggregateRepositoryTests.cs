@@ -1,11 +1,10 @@
 using System.Reflection;
 using EventStore.Client;
-using FluentAssertions;
-using FluentAssertions.Execution;
 using Microsoft.Extensions.DependencyInjection;
 using NiallMaloney.EventSourcing.Aggregates;
 using NiallMaloney.EventSourcing.Shared.Stubs;
 using NiallMaloney.EventSourcing.Shared.Stubs.Events;
+using Shouldly;
 
 namespace NiallMaloney.EventSourcing.IntegrationTests;
 
@@ -18,7 +17,7 @@ public class AggregateRepositoryTests
     public AggregateRepositoryTests()
     {
         var services = new ServiceCollection();
-        services.AddEventStore(Options.EventStore, new[] { Assembly.GetAssembly(typeof(CountDecreased)) }!);
+        services.AddEventStore(Options.EventStore, [Assembly.GetAssembly(typeof(CountDecreased))!]);
 
         var provider = services.BuildServiceProvider();
         _client = provider.GetRequiredService<EventStoreClient>();
@@ -35,12 +34,13 @@ public class AggregateRepositoryTests
         var counter = await _repository.LoadAggregate<Counter>(counterId);
 
         //Assert
-        using var _ = new AssertionScope();
-        counter.Should().NotBeNull();
-        counter.Should().BeOfType<Counter>();
-        counter.Id.Should().Be(counterId);
-        counter.Version.Should().Be(0);
-        counter.CurrentCount.Should().Be(0);
+
+        counter.ShouldSatisfyAllConditions(
+            () => counter.ShouldNotBeNull(),
+            () => counter.ShouldBeOfType<Counter>(),
+            () => counter.Id.ShouldBe(counterId),
+            () => counter.Version.ShouldBe(0),
+            () => counter.CurrentCount.ShouldBe(0));
     }
 
     [Fact]
@@ -60,12 +60,13 @@ public class AggregateRepositoryTests
         var counter = await _repository.LoadAggregate<Counter>(counterId);
 
         //Assert
-        using var _ = new AssertionScope();
-        counter.Should().NotBeNull();
-        counter.Should().BeOfType<Counter>();
-        counter.Id.Should().Be(counterId);
-        counter.Version.Should().Be(2);
-        counter.CurrentCount.Should().Be(10);
+
+        counter.ShouldSatisfyAllConditions(
+            () => counter.ShouldNotBeNull(),
+            () => counter.ShouldBeOfType<Counter>(),
+            () => counter.Id.ShouldBe(counterId),
+            () => counter.Version.ShouldBe(2),
+            () => counter.CurrentCount.ShouldBe(10));
     }
 
     [Fact]
@@ -85,13 +86,13 @@ public class AggregateRepositoryTests
         counter = await _repository.LoadAggregate<Counter>(counterId);
 
         //Assert
-        using var _ = new AssertionScope();
-        counter.Should().NotBeNull();
-        counter.Should().BeOfType<Counter>();
-        counter.Id.Should().Be(counterId);
-        counter.Version.Should().Be(2);
-        counter.CurrentCount.Should().Be(10);
-        counter.UnsavedEvents.Should().BeEmpty();
+        counter.ShouldSatisfyAllConditions(
+            () => counter.ShouldNotBeNull(),
+            () => counter.ShouldBeOfType<Counter>(),
+            () => counter.Id.ShouldBe(counterId),
+            () => counter.Version.ShouldBe(2),
+            () => counter.CurrentCount.ShouldBe(10),
+            () => counter.UnsavedEvents.ShouldBeEmpty());
     }
 
     private static string NewGuidString() => Guid.NewGuid().ToString();

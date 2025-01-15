@@ -1,6 +1,6 @@
 using System.Reflection;
 using EventStore.Client;
-using FluentAssertions;
+using Shouldly;
 
 namespace NiallMaloney.EventSourcing.IntegrationTests;
 
@@ -27,24 +27,25 @@ public class EventStoreTests
         var unitTested = new UnitTested(testId);
 
         //Act
-        await _client.AppendToStreamAsync(streamId, StreamRevision.None, new[] { unitTested });
+        await _client.AppendToStreamAsync(streamId, StreamRevision.None, [unitTested]);
 
         var enumerable =
             await _client.ReadStreamAsync(streamId, StreamPosition.Start, Direction.Forwards, resolveLinkTos: true);
 
         //Assert
         var events = await enumerable!.ToListAsync();
-        events.Count.Should().Be(1);
+        events.Count.ShouldBe(1);
 
         var envelope = events.Single();
 
-        var evnt = envelope.Event.Should().BeOfType<UnitTested>().Subject;
-        evnt.TestId.Should().Be(testId);
+        var evnt = envelope.Event as UnitTested;
+        evnt.ShouldBeOfType<UnitTested>();
+        evnt.TestId.ShouldBe(testId);
 
         var metadata = envelope.Metadata;
-        metadata.EventId.Should().NotBeNull();
-        metadata.StreamPosition.Should().Be(0);
-        metadata.AggregatedStreamPosition.Should().Be(0);
+        metadata.EventId.ShouldBeOfType<Uuid>();
+        metadata.StreamPosition.ShouldBe(0UL);
+        metadata.AggregatedStreamPosition.ShouldBe(0UL);
     }
 
     [Fact]
@@ -53,7 +54,7 @@ public class EventStoreTests
         //Arrange
         var streamId = Guid.NewGuid().ToString();
         var testId = Guid.NewGuid().ToString();
-        var unitTestedEvents = new[] { new UnitTested(testId), new UnitTested(testId), new UnitTested(testId) };
+        UnitTested[] unitTestedEvents = [new(testId), new(testId), new(testId)];
 
         //Act
         await _client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents);
@@ -62,18 +63,19 @@ public class EventStoreTests
 
         //Assert
         var events = await enumerable!.ToListAsync();
-        events.Count.Should().Be(3);
+        events.Count.ShouldBe(3);
 
         var position = 0UL;
         foreach (var envelope in events)
         {
-            var evnt = envelope.Event.Should().BeOfType<UnitTested>().Subject;
-            evnt.TestId.Should().Be(testId);
+            var evnt = envelope.Event as UnitTested;
+            evnt.ShouldBeOfType<UnitTested>();
+            evnt.TestId.ShouldBe(testId);
 
             var metadata = envelope.Metadata;
-            metadata.EventId.Should().NotBeNull();
-            metadata.StreamPosition.Should().Be(position);
-            metadata.AggregatedStreamPosition.Should().Be(position);
+            metadata.EventId.ShouldBeOfType<Uuid>();
+            metadata.StreamPosition.ShouldBe(position);
+            metadata.AggregatedStreamPosition.ShouldBe(position);
 
             position++;
         }
