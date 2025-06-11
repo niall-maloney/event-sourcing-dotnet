@@ -1,5 +1,6 @@
 using System.Reflection;
 using EventStore.Client;
+using NiallMaloney.EventSourcing.IntegrationTests.Events;
 using Shouldly;
 
 namespace NiallMaloney.EventSourcing.IntegrationTests;
@@ -81,6 +82,3 @@ public class EventStoreTests
         }
     }
 }
-
-[Event("TestEvent")]
-public record UnitTested(string TestId) : IEvent;

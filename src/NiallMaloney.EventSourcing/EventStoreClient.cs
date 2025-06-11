@@ -20,7 +20,8 @@ public class EventStoreClient
         bool resolveLinkTos,
         CancellationToken cancellationToken = default)
     {
-        return ReadStreamAsync(streamName, StreamPosition.Start, Direction.Forwards, resolveLinkTos: resolveLinkTos,
+        return ReadStreamAsync(streamName, StreamPosition.Start, Direction.Forwards,
+            resolveLinkTos: resolveLinkTos,
             cancellationToken: cancellationToken);
     }
 
@@ -32,7 +33,8 @@ public class EventStoreClient
         bool resolveLinkTos = false,
         CancellationToken cancellationToken = default)
     {
-        var result = _eventStore.ReadStreamAsync(direction, streamName, position, maxCount: maxCount,
+        var result = _eventStore.ReadStreamAsync(direction, streamName, position,
+            maxCount: maxCount,
             resolveLinkTos: resolveLinkTos, cancellationToken: cancellationToken);
 
         if (await result.ReadState is ReadState.StreamNotFound)
@@ -40,8 +42,9 @@ public class EventStoreClient
             return null;
         }
 
-        return result.Select(resolvedEvent => new EventEnvelope<IEvent>(_serializer.Deserialize(resolvedEvent.Event),
-            EventMetadata.FromResolvedEvent(resolvedEvent)));
+        return result.Select(resolvedEvent =>
+            new EventEnvelope<IEvent>(DeserializeEvent(resolvedEvent.Event),
+                EventMetadata.FromResolvedEvent(resolvedEvent)));
     }
 
     public async Task AppendToStreamAsync(
@@ -52,7 +55,8 @@ public class EventStoreClient
     {
         await _eventStore.AppendToStreamAsync(streamName, expectedRevision,
             events.Select(
-                e => new EventData(Uuid.NewUuid(), IEvent.GetEventType(e.GetType()), _serializer.Serialize(e))),
+                e => new EventData(Uuid.NewUuid(), IEvent.GetEventType(e.GetType()),
+                    _serializer.Serialize(e))),
             cancellationToken: cancellationToken);
     }
 
@@ -67,11 +71,14 @@ public class EventStoreClient
             (_, re, ct) =>
             {
                 var evnt = new EventEnvelope<IEvent>(
-                    _serializer.Deserialize(re.Event),
+                    DeserializeEvent(re.Event),
                     EventMetadata.FromResolvedEvent(re));
 
                 return eventAppeared.Invoke(evnt, ct);
             }, resolveLinkTos,
             cancellationToken: cancellationToken);
     }
+
+    private IEvent DeserializeEvent(EventRecord eventRecord) =>
+        _serializer.Deserialize(eventRecord.Data, eventRecord.EventType);
 }
