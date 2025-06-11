@@ -36,17 +36,20 @@ public class SubscriptionsTests
 
         var testId = Guid.NewGuid().ToString();
         var streamId = $"tests-{testId}";
-        IEvent[] unitTestedEvents = [new UnitTested(testId), new UnitTested(testId), new UnitTested(testId)];
+        IEvent[] unitTestedEvents =
+            [new UnitTested(testId), new UnitTested(testId), new UnitTested(testId)];
 
         var categoryStreamLength = await GetCategoryStreamLength(client, categoryStreamName);
         var expectedCategoryStreamLength = categoryStreamLength + (ulong)unitTestedEvents.Length;
 
         //Set cursor to current stream length to avoid full projection
-        await cursorRepository.UpsertSubscriptionCursor(subscriberName, categoryStreamName, categoryStreamLength);
+        await cursorRepository.UpsertSubscriptionCursor(subscriberName, categoryStreamName,
+            categoryStreamLength);
         await subscriptionsManager.StartAsync(cancellationToken);
 
         //Act
-        await client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents, cancellationToken);
+        await client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents,
+            cancellationToken);
         await WaitForSubscriptionToCatchup(cursorRepository, subscriberName, categoryStreamName,
             expectedCategoryStreamLength);
         await subscriptionsManager.StopAsync(cancellationToken);
@@ -57,7 +60,8 @@ public class SubscriptionsTests
     }
 
     [Fact]
-    public async Task GivenSubscriptionRegistered_WithCursorFromStreamEnd_WhenEventsCommitted_ThenEventHandlerCalled()
+    public async Task
+        GivenSubscriptionRegistered_WithCursorFromStreamEnd_WhenEventsCommitted_ThenEventHandlerCalled()
     {
         //Arrange
         var cancellationToken = CancellationToken.None;
@@ -80,7 +84,8 @@ public class SubscriptionsTests
 
         var testId = Guid.NewGuid().ToString();
         var streamId = $"tests-{testId}";
-        IEvent[] unitTestedEvents = [new UnitTested(testId), new UnitTested(testId), new UnitTested(testId)];
+        IEvent[] unitTestedEvents =
+            [new UnitTested(testId), new UnitTested(testId), new UnitTested(testId)];
 
         var categoryStreamLength = await GetCategoryStreamLength(client, categoryStreamName);
         var expectedCategoryStreamLength = categoryStreamLength + (ulong)unitTestedEvents.Length;
@@ -89,7 +94,8 @@ public class SubscriptionsTests
         await subscriptionsManager.StartAsync(cancellationToken);
 
         //Act
-        await client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents, cancellationToken);
+        await client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents,
+            cancellationToken);
         await WaitForSubscriptionToCatchup(cursorRepository, subscriberName, categoryStreamName,
             expectedCategoryStreamLength);
         await subscriptionsManager.StopAsync(cancellationToken);
@@ -99,22 +105,18 @@ public class SubscriptionsTests
         store.Tests[testId].ShouldBe(3);
     }
 
-    private static async Task PrepareCategoryStream(EventStoreClient client, CancellationToken cancellationToken)
+    private static async Task PrepareCategoryStream(EventStoreClient client,
+        CancellationToken cancellationToken)
     {
-        if ((await GetCategoryStreamLength(client, "$ce-deadletter_tests")) != 0)
+        if ((await GetCategoryStreamLength(client, "$ce-tests")) != 0)
         {
             return;
         }
 
         // fire off random event so category stream exists
-        var streamId = $"deadletter_tests-{Guid.NewGuid().ToString()}";
+        var streamId = $"tests-{Guid.NewGuid().ToString()}";
         await client.AppendToStreamAsync(streamId, StreamRevision.None, [new UnitTested(streamId)],
             cancellationToken);
-
-        while ((await GetCategoryStreamLength(client, "$ce-deadletter_tests")) < 1)
-        {
-            await Task.Delay(50, cancellationToken);
-        }
     }
 
     private static async Task WaitForSubscriptionToCatchup(
@@ -136,9 +138,11 @@ public class SubscriptionsTests
         string categoryStreamName) =>
         await cursorRepository.GetSubscriptionCursor(subscriberName, categoryStreamName) ?? 0;
 
-    private static async Task<ulong> GetCategoryStreamLength(EventStoreClient client, string streamName)
+    private static async Task<ulong> GetCategoryStreamLength(EventStoreClient client,
+        string streamName)
     {
-        var enumerable = await client.ReadStreamAsync(streamName, StreamPosition.End, Direction.Backwards, 1,
+        var enumerable = await client.ReadStreamAsync(streamName, StreamPosition.End,
+            Direction.Backwards, 1,
             resolveLinkTos: true);
 
         if (enumerable is null)

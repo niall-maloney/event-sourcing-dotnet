@@ -218,11 +218,6 @@ public class DeadLetterTests
         var streamId = $"deadletter_tests-{Guid.NewGuid().ToString()}";
         await client.AppendToStreamAsync(streamId, StreamRevision.None, [new UnitTested(streamId)],
             cancellationToken);
-
-        while ((await GetCategoryStreamLength(client, "$ce-deadletter_tests")) < 1)
-        {
-            await Task.Delay(50, cancellationToken);
-        }
     }
 
     private static async Task WaitForSubscriptionToCatchup(
