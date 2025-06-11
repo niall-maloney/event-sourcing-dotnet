@@ -5,17 +5,25 @@ namespace NiallMaloney.EventSourcing.Aggregates;
 public abstract class Aggregate
 {
     private readonly string? _id;
-    public string Id { get => _id ?? throw new InvalidOperationException("No ID set"); init => _id = value; }
+
+    public string Id
+    {
+        get => _id ?? throw new InvalidOperationException("No ID set.");
+        init => _id = value;
+    }
 
     public int Version { get; protected set; }
 
-    private ImmutableArray<EventEnvelope<IEvent>> _savedEvents = ImmutableArray<EventEnvelope<IEvent>>.Empty;
+    private ImmutableArray<EventEnvelope<IEvent>> _savedEvents =
+        ImmutableArray<EventEnvelope<IEvent>>.Empty;
+
     public ImmutableArray<EventEnvelope<IEvent>> SavedEvents => _savedEvents;
 
     private readonly Queue<IEvent> _unsavedEvents = new();
     public ImmutableArray<IEvent> UnsavedEvents => _unsavedEvents.ToImmutableArray();
 
-    private readonly IDictionary<Type, Action<IEvent>> _handlers = new Dictionary<Type, Action<IEvent>>();
+    private readonly IDictionary<Type, Action<IEvent>> _handlers =
+        new Dictionary<Type, Action<IEvent>>();
 
     public ImmutableArray<IEvent> DequeueUnsavedEvents()
     {

@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="EventStore.Client.Grpc.Streams" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+    <PackageReference Include="Nito.Guids" />
     <PackageReference Include="NodaTime" />
     <PackageReference Include="NodaTime.Serialization.SystemTextJson" />
   </ItemGroup>

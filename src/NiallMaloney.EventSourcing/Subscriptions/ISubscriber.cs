@@ -4,9 +4,10 @@ namespace NiallMaloney.EventSourcing.Subscriptions;
 
 public interface ISubscriber
 {
-    Task Handle(EventEnvelope<IEvent> envelope);
+    Task<EventHandlerResult> Handle(EventEnvelope<IEvent> envelope);
 
-    public static IEnumerable<SubscriptionAttribute> GetSubscriptionAttributes<T>() where T : class =>
+    public static IEnumerable<SubscriptionAttribute> GetSubscriptionAttributes<T>()
+        where T : class =>
         GetSubscriptionAttributes(typeof(T));
 
     public static IEnumerable<SubscriptionAttribute> GetSubscriptionAttributes(Type type) =>
@@ -16,5 +17,6 @@ public interface ISubscriber
 
     public static string GetSubscriberName(Type type) =>
         (type.GetCustomAttribute<SubscriberNameAttribute>() ??
-         throw new InvalidOperationException($"Missing \"SubscriptionAttribute\" on {type.Name}.")).Name;
+         throw new InvalidOperationException($"Missing \"SubscriptionAttribute\" on {type.Name}."))
+        .Name;
 }

@@ -23,31 +23,37 @@ public class EventSerializer
             throw new InvalidOperationException($"Could not find Event class for {eventType}.");
         }
 
-        return JsonSerializer.SerializeToUtf8Bytes(evnt, evnt.GetType(), DefaultJsonSerializerOptions.Options);
+        return JsonSerializer.SerializeToUtf8Bytes(evnt, evnt.GetType(),
+            DefaultJsonSerializerOptions.Options);
     }
 
-    public IEvent Deserialize(EventRecord eventRecord)
+    public IEvent Deserialize(ReadOnlyMemory<byte> eventBytes, string eventTypeString)
     {
-        if (!_eventTypeLookup.TryGetValue(eventRecord.EventType, out var eventType))
+        if (!_eventTypeLookup.TryGetValue(eventTypeString, out var eventType))
         {
-            throw new InvalidOperationException($"Could not find Event class for {eventRecord.EventType}.");
+            throw new InvalidOperationException(
+                $"Could not find Event class for {eventTypeString}.");
         }
 
         var deserializedEvent =
-            JsonSerializer.Deserialize(eventRecord.Data.Span, eventType, DefaultJsonSerializerOptions.Options);
+            JsonSerializer.Deserialize(eventBytes.Span, eventType,
+                DefaultJsonSerializerOptions.Options);
 
         if (deserializedEvent is null)
         {
-            throw new InvalidOperationException($"Could not deserialize event data to {eventType.Name}.");
+            throw new InvalidOperationException(
+                $"Could not deserialize event data to {eventType.Name}.");
         }
 
         return (IEvent)deserializedEvent;
     }
 
-    private static ImmutableDictionary<string, Type> GetEventTypeLookup(IEnumerable<Assembly> assemblies)
+    private static ImmutableDictionary<string, Type> GetEventTypeLookup(
+        IEnumerable<Assembly> assemblies)
     {
         var eventSubclasses = assemblies.SelectMany(assembly =>
-            assembly.DefinedTypes.Where(type => type.ImplementedInterfaces.Contains(typeof(IEvent))));
+            assembly.DefinedTypes.Where(type =>
+                type.ImplementedInterfaces.Contains(typeof(IEvent))));
 
         return eventSubclasses.ToImmutableDictionary(IEvent.GetEventType, type => type.AsType());
     }
