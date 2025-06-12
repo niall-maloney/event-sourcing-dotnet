@@ -39,7 +39,7 @@ public class SubscriptionsTests
         IEvent[] unitTestedEvents =
             [new UnitTested(testId), new UnitTested(testId), new UnitTested(testId)];
 
-        var categoryStreamLength = await GetCategoryStreamLength(client, categoryStreamName);
+        var categoryStreamLength = await GetCategoryStreamPosition(client, categoryStreamName);
         var expectedCategoryStreamLength = categoryStreamLength + (ulong)unitTestedEvents.Length;
 
         //Set cursor to current stream length to avoid full projection
@@ -87,7 +87,7 @@ public class SubscriptionsTests
         IEvent[] unitTestedEvents =
             [new UnitTested(testId), new UnitTested(testId), new UnitTested(testId)];
 
-        var categoryStreamLength = await GetCategoryStreamLength(client, categoryStreamName);
+        var categoryStreamLength = await GetCategoryStreamPosition(client, categoryStreamName);
         var expectedCategoryStreamLength = categoryStreamLength + (ulong)unitTestedEvents.Length;
 
         //We don't need to set cursor to current stream length as we are subscribing from end
@@ -108,7 +108,7 @@ public class SubscriptionsTests
     private static async Task PrepareCategoryStream(EventStoreClient client,
         CancellationToken cancellationToken)
     {
-        if ((await GetCategoryStreamLength(client, "$ce-tests")) != 0)
+        if ((await GetCategoryStreamPosition(client, "$ce-tests")) != 0)
         {
             return;
         }
@@ -117,6 +117,11 @@ public class SubscriptionsTests
         var streamId = $"tests-{Guid.NewGuid().ToString()}";
         await client.AppendToStreamAsync(streamId, StreamRevision.None, [new UnitTested(streamId)],
             cancellationToken);
+
+        while ((await GetCategoryStreamLength(client, "$ce-deadletter_tests")) < 1)
+        {
+            await Task.Delay(50, cancellationToken);
+        }
     }
 
     private static async Task WaitForSubscriptionToCatchup(
@@ -138,8 +143,20 @@ public class SubscriptionsTests
         string categoryStreamName) =>
         await cursorRepository.GetSubscriptionCursor(subscriberName, categoryStreamName) ?? 0;
 
+    private static async Task<ulong> GetCategoryStreamPosition(EventStoreClient client,
+        string streamName)
+    {
+        return await GetAggregatedStreamPosition(client, streamName, getLength: false);
+    }
+
     private static async Task<ulong> GetCategoryStreamLength(EventStoreClient client,
         string streamName)
+    {
+        return await GetAggregatedStreamPosition(client, streamName);
+    }
+
+    private static async Task<ulong> GetAggregatedStreamPosition(EventStoreClient client,
+        string streamName, bool getLength = true)
     {
         var enumerable = await client.ReadStreamAsync(streamName, StreamPosition.End,
             Direction.Backwards, 1,
@@ -151,6 +168,8 @@ public class SubscriptionsTests
         }
 
         var envelope = await enumerable.SingleAsync();
-        return envelope.Metadata.AggregatedStreamPosition;
+        return getLength
+            ? envelope.Metadata.AggregatedStreamPosition + 1
+            : envelope.Metadata.AggregatedStreamPosition;
     }
 }

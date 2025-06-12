@@ -56,7 +56,7 @@ public class DeadLetterTests
         deadLetterFlags.SetFlag(testId, flag: true);
 
         //Set cursor to current stream length to avoid full projection
-        var categoryStreamLength = await GetCategoryStreamLength(client, categoryStreamName);
+        var categoryStreamLength = await GetCategoryStreamPosition(client, categoryStreamName);
         await cursorRepository.UpsertSubscriptionCursor(subscriberName, categoryStreamName,
             categoryStreamLength);
 
@@ -115,7 +115,7 @@ public class DeadLetterTests
         deadLetterFlags.SetFlag(testId, flag: true);
 
         //Set cursor to current stream length to avoid full projection
-        var categoryStreamLength = await GetCategoryStreamLength(client, categoryStreamName);
+        var categoryStreamLength = await GetCategoryStreamPosition(client, categoryStreamName);
         await cursorRepository.UpsertSubscriptionCursor(subscriberName, categoryStreamName,
             categoryStreamLength);
         _output.WriteLine($"{categoryStreamLength.ToString()}");
@@ -180,7 +180,7 @@ public class DeadLetterTests
         deadLetterFlags.SetFlag(testId, flag: true);
 
         //Set cursor to current stream length to avoid full projection
-        var categoryStreamLength = await GetCategoryStreamLength(client, categoryStreamName);
+        var categoryStreamLength = await GetCategoryStreamPosition(client, categoryStreamName);
         await cursorRepository.UpsertSubscriptionCursor(subscriberName, categoryStreamName,
             categoryStreamLength);
         _output.WriteLine($"{categoryStreamLength.ToString()}");
@@ -218,6 +218,11 @@ public class DeadLetterTests
         var streamId = $"deadletter_tests-{Guid.NewGuid().ToString()}";
         await client.AppendToStreamAsync(streamId, StreamRevision.None, [new UnitTested(streamId)],
             cancellationToken);
+
+        while ((await GetCategoryStreamLength(client, "$ce-deadletter_tests")) < 1)
+        {
+            await Task.Delay(50, cancellationToken);
+        }
     }
 
     private static async Task WaitForSubscriptionToCatchup(
@@ -239,8 +244,20 @@ public class DeadLetterTests
         string categoryStreamName) =>
         await cursorRepository.GetSubscriptionCursor(subscriberName, categoryStreamName) ?? 0;
 
+    private static async Task<ulong> GetCategoryStreamPosition(EventStoreClient client,
+        string streamName)
+    {
+        return await GetAggregatedStreamPosition(client, streamName, getLength: false);
+    }
+
     private static async Task<ulong> GetCategoryStreamLength(EventStoreClient client,
         string streamName)
+    {
+        return await GetAggregatedStreamPosition(client, streamName);
+    }
+
+    private static async Task<ulong> GetAggregatedStreamPosition(EventStoreClient client,
+        string streamName, bool getLength = true)
     {
         var enumerable = await client.ReadStreamAsync(streamName, StreamPosition.End,
             Direction.Backwards, 1,
@@ -252,6 +269,8 @@ public class DeadLetterTests
         }
 
         var envelope = await enumerable.SingleAsync();
-        return envelope.Metadata.AggregatedStreamPosition;
+        return getLength
+            ? envelope.Metadata.AggregatedStreamPosition + 1
+            : envelope.Metadata.AggregatedStreamPosition;
     }
 }
