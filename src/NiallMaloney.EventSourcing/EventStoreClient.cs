@@ -1,15 +1,13 @@
-using EventStore.Client;
+using KurrentDB.Client;
 
 namespace NiallMaloney.EventSourcing;
 
-using EventStore = EventStore.Client.EventStoreClient;
-
 public class EventStoreClient
 {
-    private readonly EventStore _eventStore;
+    private readonly KurrentDBClient _eventStore;
     private readonly EventSerializer _serializer;
 
-    public EventStoreClient(EventStore eventStore, EventSerializer serializer)
+    public EventStoreClient(KurrentDBClient eventStore, EventSerializer serializer)
     {
         _eventStore = eventStore;
         _serializer = serializer;
@@ -49,11 +47,11 @@ public class EventStoreClient
 
     public async Task AppendToStreamAsync(
         string streamName,
-        StreamRevision expectedRevision,
+        StreamState expectedState,
         IReadOnlyCollection<IEvent> events,
         CancellationToken cancellationToken = default)
     {
-        await _eventStore.AppendToStreamAsync(streamName, expectedRevision,
+        await _eventStore.AppendToStreamAsync(streamName, expectedState,
             events.Select(
                 e => new EventData(Uuid.NewUuid(), IEvent.GetEventType(e.GetType()),
                     _serializer.Serialize(e))),

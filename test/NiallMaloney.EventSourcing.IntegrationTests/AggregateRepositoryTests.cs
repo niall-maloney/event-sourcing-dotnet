@@ -1,5 +1,6 @@
 using System.Reflection;
 using EventStore.Client;
+using KurrentDB.Client;
 using Microsoft.Extensions.DependencyInjection;
 using NiallMaloney.EventSourcing.Aggregates;
 using NiallMaloney.EventSourcing.Shared.Stubs;
@@ -17,7 +18,7 @@ public class AggregateRepositoryTests
     public AggregateRepositoryTests()
     {
         var services = new ServiceCollection();
-        services.AddEventStore(Options.EventStore, [Assembly.GetAssembly(typeof(CountDecreased))!]);
+        services.AddEventStore(Options.KurrentDB, [Assembly.GetAssembly(typeof(CountDecreased))!]);
 
         var provider = services.BuildServiceProvider();
         _client = provider.GetRequiredService<EventStoreClient>();
@@ -54,7 +55,7 @@ public class AggregateRepositoryTests
             new CountIncreased(counterId, 20, 20),
             new CountDecreased(counterId, 10, 10)
         };
-        await _client.AppendToStreamAsync($"counters-{counterId}", StreamRevision.None, events);
+        await _client.AppendToStreamAsync($"counters-{counterId}", StreamState.NoStream, events);
 
         //Act
         var counter = await _repository.LoadAggregate<Counter>(counterId);

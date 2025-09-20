@@ -1,5 +1,5 @@
 using System.Reflection;
-using EventStore.Client;
+using KurrentDB.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NiallMaloney.EventSourcing.IntegrationTests.Events;
@@ -18,7 +18,7 @@ public class SubscriptionsTests
         //Arrange
         var cancellationToken = CancellationToken.None;
         var services = new ServiceCollection();
-        services.AddEventStore(Options.EventStore, [Assembly.GetAssembly(typeof(UnitTested))!]!)
+        services.AddEventStore(Options.KurrentDB, [Assembly.GetAssembly(typeof(UnitTested))!]!)
             .AddSubscriber<TestSubscriberFromStreamStart>()
             .AddSingleton<ISubscriptionCursorRepository, InMemoryCursorRepository>()
             .AddSingleton<TestStore>();
@@ -48,7 +48,7 @@ public class SubscriptionsTests
         await subscriptionsManager.StartAsync(cancellationToken);
 
         //Act
-        await client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents,
+        await client.AppendToStreamAsync(streamId, StreamState.NoStream, unitTestedEvents,
             cancellationToken);
         await WaitForSubscriptionToCatchup(cursorRepository, subscriberName, categoryStreamName,
             expectedCategoryStreamLength);
@@ -66,7 +66,7 @@ public class SubscriptionsTests
         //Arrange
         var cancellationToken = CancellationToken.None;
         var services = new ServiceCollection();
-        services.AddEventStore(Options.EventStore, [Assembly.GetAssembly(typeof(UnitTested))!]!)
+        services.AddEventStore(Options.KurrentDB, [Assembly.GetAssembly(typeof(UnitTested))!]!)
             .AddSubscriber<TestSubscriberFromStreamEnd>()
             .AddSingleton<ISubscriptionCursorRepository, InMemoryCursorRepository>()
             .AddSingleton<TestStore>();
@@ -94,7 +94,7 @@ public class SubscriptionsTests
         await subscriptionsManager.StartAsync(cancellationToken);
 
         //Act
-        await client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents,
+        await client.AppendToStreamAsync(streamId, StreamState.NoStream, unitTestedEvents,
             cancellationToken);
         await WaitForSubscriptionToCatchup(cursorRepository, subscriberName, categoryStreamName,
             expectedCategoryStreamLength);
@@ -115,7 +115,7 @@ public class SubscriptionsTests
 
         // fire off random event so category stream exists
         var streamId = $"tests-{Guid.NewGuid().ToString()}";
-        await client.AppendToStreamAsync(streamId, StreamRevision.None, [new UnitTested(streamId)],
+        await client.AppendToStreamAsync(streamId, StreamState.NoStream, [new UnitTested(streamId)],
             cancellationToken);
 
         while ((await GetCategoryStreamLength(client, "$ce-deadletter_tests")) < 1)

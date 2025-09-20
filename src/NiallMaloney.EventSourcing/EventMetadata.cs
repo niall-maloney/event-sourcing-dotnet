@@ -1,4 +1,4 @@
-using EventStore.Client;
+using KurrentDB.Client;
 using NodaTime;
 using NodaTime.Extensions;
 

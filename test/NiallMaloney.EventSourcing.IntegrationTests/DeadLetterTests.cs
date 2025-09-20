@@ -1,5 +1,5 @@
 using System.Reflection;
-using EventStore.Client;
+using KurrentDB.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NiallMaloney.EventSourcing.DeadLetters;
@@ -27,7 +27,7 @@ public class DeadLetterTests
         //Arrange
         var cancellationToken = CancellationToken.None;
         var services = new ServiceCollection();
-        services.AddEventStore(Options.EventStore, [Assembly.GetAssembly(typeof(UnitTested))!]!)
+        services.AddEventStore(Options.KurrentDB, [Assembly.GetAssembly(typeof(UnitTested))!]!)
             .AddSubscriber<TestDeadLetterSubscriber>()
             .AddSingleton<ISubscriptionCursorRepository, InMemoryCursorRepository>()
             .AddDeadLetters(_ => new InMemoryDeadLetterRepository())
@@ -63,7 +63,7 @@ public class DeadLetterTests
         await subscriptionsManager.StartAsync(cancellationToken);
 
         //Act
-        await client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents,
+        await client.AppendToStreamAsync(streamId, StreamState.NoStream, unitTestedEvents,
             cancellationToken);
         await WaitForSubscriptionToCatchup(cursorRepository, subscriberName, categoryStreamName,
             categoryStreamLength + (ulong)unitTestedEvents.Length);
@@ -86,7 +86,7 @@ public class DeadLetterTests
         //Arrange
         var cancellationToken = CancellationToken.None;
         var services = new ServiceCollection();
-        services.AddEventStore(Options.EventStore, [Assembly.GetAssembly(typeof(UnitTested))!]!)
+        services.AddEventStore(Options.KurrentDB, [Assembly.GetAssembly(typeof(UnitTested))!]!)
             .AddSubscriber<TestDeadLetterSubscriber>()
             .AddSingleton<ISubscriptionCursorRepository, InMemoryCursorRepository>()
             .AddDeadLetters(_ => new InMemoryDeadLetterRepository())
@@ -122,7 +122,7 @@ public class DeadLetterTests
 
         await subscriptionsManager.StartAsync(cancellationToken);
 
-        await client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents,
+        await client.AppendToStreamAsync(streamId, StreamState.NoStream, unitTestedEvents,
             cancellationToken);
         await WaitForSubscriptionToCatchup(cursorRepository, subscriberName, categoryStreamName,
             categoryStreamLength + (ulong)unitTestedEvents.Length);
@@ -150,7 +150,7 @@ public class DeadLetterTests
         //Arrange
         var cancellationToken = CancellationToken.None;
         var services = new ServiceCollection();
-        services.AddEventStore(Options.EventStore, [Assembly.GetAssembly(typeof(UnitTested))!]!)
+        services.AddEventStore(Options.KurrentDB, [Assembly.GetAssembly(typeof(UnitTested))!]!)
             .AddSubscriber<TestDeadLetterSubscriber>()
             .AddSingleton<ISubscriptionCursorRepository, InMemoryCursorRepository>()
             .AddDeadLetters(_ => new InMemoryDeadLetterRepository())
@@ -187,7 +187,7 @@ public class DeadLetterTests
 
         await subscriptionsManager.StartAsync(cancellationToken);
 
-        await client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents,
+        await client.AppendToStreamAsync(streamId, StreamState.NoStream, unitTestedEvents,
             cancellationToken);
         await WaitForSubscriptionToCatchup(cursorRepository, subscriberName, categoryStreamName,
             categoryStreamLength + (ulong)unitTestedEvents.Length);
@@ -216,7 +216,7 @@ public class DeadLetterTests
 
         // fire off random event so category stream exists
         var streamId = $"deadletter_tests-{Guid.NewGuid().ToString()}";
-        await client.AppendToStreamAsync(streamId, StreamRevision.None, [new UnitTested(streamId)],
+        await client.AppendToStreamAsync(streamId, StreamState.NoStream, [new UnitTested(streamId)],
             cancellationToken);
 
         while ((await GetCategoryStreamLength(client, "$ce-deadletter_tests")) < 1)
