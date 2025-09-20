@@ -1,5 +1,6 @@
 using System.Reflection;
 using EventStore.Client;
+using KurrentDB.Client;
 
 namespace NiallMaloney.EventSourcing.Aggregates;
 
@@ -14,11 +15,13 @@ public static class AggregateUtilities
     public static string GetCategory(Type type)
     {
         var categoryAttribute = type.GetCustomAttribute<CategoryAttribute>() ??
-                                throw new InvalidOperationException($"Missing \"CategoryAttribute\" on {type.Name}.");
+                                throw new InvalidOperationException(
+                                    $"Missing \"CategoryAttribute\" on {type.Name}.");
 
         return categoryAttribute.Category;
     }
 
-    public static ulong GetLastSavedRevision(this Aggregate aggregate) =>
-        aggregate.SavedEvents.LastOrDefault()?.Metadata.StreamPosition ?? StreamRevision.None;
+    public static StreamState GetLastSavedRevision(this Aggregate aggregate) =>
+        aggregate.SavedEvents.LastOrDefault()?.Metadata.AggregatedStreamPosition ??
+        StreamState.NoStream;
 }

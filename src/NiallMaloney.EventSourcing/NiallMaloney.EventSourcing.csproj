@@ -10,7 +10,7 @@
     <RepositoryUrl>https://github.com/niall-maloney/event-sourcing-dotnet</RepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="EventStore.Client.Grpc.Streams" />
+    <PackageReference Include="KurrentDB.Client" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
     <PackageReference Include="Nito.Guids" />
     <PackageReference Include="NodaTime" />

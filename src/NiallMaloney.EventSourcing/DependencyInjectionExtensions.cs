@@ -9,9 +9,9 @@ public static class DependencyInjectionExtensions
 {
     public static IServiceCollection AddEventStore(
         this IServiceCollection services,
-        EventStoreClientOptions eventStoreClientOptions,
+        KurrentDBClientOptions kurrentDBClientOptions,
         Assembly[] assemblies) =>
-        services.AddEventStoreClient(eventStoreClientOptions.ConnectionString)
+        services.AddKurrentDBClient(kurrentDBClientOptions.ConnectionString)
             .AddTransient<EventStoreClient>()
             .AddSingleton(_ => new EventSerializer(assemblies))
             .AddAggregateRepository()

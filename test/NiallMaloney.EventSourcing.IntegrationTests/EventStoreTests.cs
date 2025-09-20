@@ -1,5 +1,5 @@
 using System.Reflection;
-using EventStore.Client;
+using KurrentDB.Client;
 using NiallMaloney.EventSourcing.IntegrationTests.Events;
 using Shouldly;
 
@@ -12,11 +12,10 @@ public class EventStoreTests
 
     public EventStoreTests()
     {
-        var eventStore =
-            new EventStore.Client.EventStoreClient(
-                EventStoreClientSettings.Create(Options.EventStore.ConnectionString));
+        var kurrentDBClient =
+            new KurrentDBClient(KurrentDBClientSettings.Create(Options.KurrentDB.ConnectionString));
         var serializer = new EventSerializer(Assembly.GetAssembly(typeof(UnitTested))!);
-        _client = new EventStoreClient(eventStore, serializer);
+        _client = new EventStoreClient(kurrentDBClient, serializer);
     }
 
     [Fact]
@@ -28,10 +27,11 @@ public class EventStoreTests
         var unitTested = new UnitTested(testId);
 
         //Act
-        await _client.AppendToStreamAsync(streamId, StreamRevision.None, [unitTested]);
+        await _client.AppendToStreamAsync(streamId, StreamState.NoStream, [unitTested]);
 
         var enumerable =
-            await _client.ReadStreamAsync(streamId, StreamPosition.Start, Direction.Forwards, resolveLinkTos: true);
+            await _client.ReadStreamAsync(streamId, StreamPosition.Start, Direction.Forwards,
+                resolveLinkTos: true);
 
         //Assert
         var events = await enumerable!.ToListAsync();
@@ -58,7 +58,7 @@ public class EventStoreTests
         UnitTested[] unitTestedEvents = [new(testId), new(testId), new(testId)];
 
         //Act
-        await _client.AppendToStreamAsync(streamId, StreamRevision.None, unitTestedEvents);
+        await _client.AppendToStreamAsync(streamId, StreamState.NoStream, unitTestedEvents);
 
         var enumerable = await _client.ReadStreamFromBeginningAsync(streamId, resolveLinkTos: true);
 
